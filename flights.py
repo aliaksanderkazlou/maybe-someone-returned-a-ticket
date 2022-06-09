@@ -9,16 +9,18 @@ from selenium_helper import get_driver, try_to_find_elements, try_to_find_elemen
 
 logger = logging.getLogger(__name__)
 
-_no_flights_css_selector = '.no-book-rows'
-_offers_css_selector = '.offer-item'
-
 
 def _get_flight_details(offer):
-    time_of_departure = try_to_find_element(offer, '.itinerary-part-route .origin .time').text
-    time_of_arrival = try_to_find_element(offer, '.itinerary-part-route .destination .time').text
+    time_of_departure_selector = '.itinerary-part-route .origin .time'
+    time_or_arrival_selector = '.itinerary-part-route .destination .time'
+    economy_cost_selector = '.cabin.economy .price .price-value'
+    business_cost_selector = '.cabin.business .price .price-value'
 
-    economy_cost = try_to_find_element(offer, '.cabin.economy .price .price-value')
-    business_cost = try_to_find_element(offer, '.cabin.business .price .price-value')
+    time_of_departure = try_to_find_element(offer, time_of_departure_selector).text
+    time_of_arrival = try_to_find_element(offer, time_or_arrival_selector).text
+
+    economy_cost = try_to_find_element(offer, economy_cost_selector)
+    business_cost = try_to_find_element(offer, business_cost_selector)
 
     return {
         'time_of_departure': time_of_departure,
@@ -57,8 +59,11 @@ def get_available_flights_info(destination, arrival, date, adults, children, inf
 
             _wait_for_into_to_appear(driver)
 
-            no_flights = try_to_find_element(driver, _no_flights_css_selector)
-            offers = try_to_find_elements(driver, _offers_css_selector)
+            no_flights_css_selector = '.no-book-rows'
+            offers_css_selector = '.offer-item'
+
+            no_flights = try_to_find_element(driver, no_flights_css_selector)
+            offers = try_to_find_elements(driver, offers_css_selector)
 
             if no_flights is None and len(offers) > 0:
                 flights = [_get_flight_details(offer) for offer in offers]
