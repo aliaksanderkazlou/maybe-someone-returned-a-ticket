@@ -23,7 +23,8 @@ def _create_searches_table(cursor):
             adults NUMERIC NOT NULL,
             children NUMERIC NOT NULL,
             infants NUMERIC NOT NULL,
-            last_checked TIMESTAMP 
+            last_checked TIMESTAMP,
+            last_notified_user TIMESTAMP
         );""")
 
     cursor.execute(f"""
@@ -134,12 +135,12 @@ def update_last_checked(destination, arrival, date_of_flight, adults, children, 
                 (datetime.now(), destination, arrival, date_of_flight, adults, children, infants))
 
 
-def get_subscribed_users_chats_ids(destination, arrival, date_of_flight, adults, children, infants):
+def get_search_subscription_info(destination, arrival, date_of_flight, adults, children, infants):
     with _connect_to_db() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-                SELECT usr.chat_id FROM {config['searches_table']} srh
+                SELECT usr.chat_id, srh.last_notified_user FROM {config['searches_table']} srh
                     JOIN {config['users_table']} usr ON srh.user_id = usr.id
                 WHERE srh.destination = %s 
                     AND srh.arrival = %s 
